@@ -6,45 +6,41 @@ using System.Threading.Tasks;
 
 namespace Library
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-
     public class Author
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public int Birthday { get; set; }
+        public int BirthYear { get; set; }
 
-        public Author(string firstName, string lastName, int birthday)
+        public Author(string firstName, string lastName, int birthyear)
         {
             FirstName = firstName;
             LastName = lastName;
-            Birthday = birthday;
+            BirthYear = birthyear;
         }
 
         public override string ToString()
         {
-            return $"{FirstName} {LastName} ({Birthday})";
+            return $"{FirstName} {LastName} (род. {BirthYear})";
         }
     }
 
     public class Book
     {
         public string Title { get; set; }
-        public Author Author { get; set; }
-        public int Publication { get; set; }
+        public Author BookAuthor { get; set; }
+        public int YearPublished { get; set; }
 
-        public Book(string title, Author author, int publication)
+        public Book(string title, Author author, int yearPublished)
         {
             Title = title;
-            Author = author;
-            Publication = publication;
+            BookAuthor = author;
+            YearPublished = yearPublished;
         }
 
         public override string ToString()
         {
-            return $"{Title} by {Author} ({Publication})";
+            return $"{Title}, автор: {BookAuthor}, год издания: {YearPublished}";
         }
     }
 
@@ -55,65 +51,95 @@ namespace Library
         public void AddBook(Book book)
         {
             books.Add(book);
+            Console.WriteLine($"Книга \"{book.Title}\" добавлена в библиотеку.");
         }
 
         public void RemoveBook(Book book)
         {
-            books.Remove(book);
+            if (books.Contains(book))
+            {
+                books.Remove(book);
+                Console.WriteLine($"Книга \"{book.Title}\" удалена из библиотеки.");
+            }
+            else
+            {
+                Console.WriteLine($"Книга \"{book.Title}\" не найдена в библиотеке.");
+            }
         }
 
-        public List<Book> FindBooksByAuthor(string authorLastName)
+        public List<Book> FindBooksByAuthor(string firstName, string lastName)
         {
-            return books.Where(b => b.Author.LastName.Equals(authorLastName, StringComparison.OrdinalIgnoreCase)).ToList();
+            return books.Where(b => b.BookAuthor.FirstName == firstName && b.BookAuthor.LastName == lastName).ToList();
         }
 
         public List<Book> FindBooksByYear(int year)
         {
-            return books.Where(b => b.Publication == year).ToList();
+            return books.Where(b => b.YearPublished == year).ToList();
         }
 
-        public void DisplayBooks()
+        public void ListBooks()
         {
-            foreach (var book in books)
+            if (books.Count == 0)
             {
-                Console.WriteLine(book);
+                Console.WriteLine("Библиотека пуста.");
+            }
+            else
+            {
+                Console.WriteLine("Книги в библиотеке:");
+                foreach (var book in books)
+                {
+                    Console.WriteLine(book);
+                }
             }
         }
     }
 
-    public class Program
+    class Program
     {
-        public static void Main()
+        static void Main(string[] args)
         {
-            Author author1 = new Author("Leo", "Tolstoy", 1828);
-            Author author2 = new Author("Fyodor", "Dostoevsky", 1821);
+            // Создаем авторов
 
-            Book book1 = new Book("War and Peace", author1, 1869);
-            Book book2 = new Book("Anna Karenina", author1, 1877);
-            Book book3 = new Book("Crime and Punishment", author2, 1866);
+            Author author1 = new Author("Лев", "Толстой", 1828);
+            Author author2 = new Author("Федор", "Достоевский", 1821);
 
+            // Создаем книги
+            Book book1 = new Book("Война и мир", author1, 1869);
+            Book book2 = new Book("Преступление и наказание", author2, 1866);
+            Book book3 = new Book("Анна Каренина", author1, 1877);
+
+            // Создаем библиотеку
             Library library = new Library();
+
+            // Добавляем книги в библиотеку
             library.AddBook(book1);
             library.AddBook(book2);
             library.AddBook(book3);
 
-            Console.WriteLine("All books in the library:");
-            library.DisplayBooks();
+            // Список книг в библиотеке
+            library.ListBooks();
 
-            Console.WriteLine("\nBooks by Tolstoy:");
-            var tolstoyBooks = library.FindBooksByAuthor("Tolstoy");
+            // Поиск книг по автору
+            var tolstoyBooks = library.FindBooksByAuthor("Лев", "Толстой");
+            Console.WriteLine("\nКниги Льва Толстого:");
             foreach (var book in tolstoyBooks)
             {
                 Console.WriteLine(book);
             }
 
-            Console.WriteLine("\nBooks published in 1866:");
-            var books1866 = library.FindBooksByYear(1866);
-            foreach (var book in books1866)
+            // Поиск книг по году издания
+            var booksFrom1866 = library.FindBooksByYear(1866);
+            Console.WriteLine("\nКниги, изданные в 1866 году:");
+            foreach (var book in booksFrom1866)
             {
                 Console.WriteLine(book);
             }
+
+            // Удаление книги
+            library.RemoveBook(book2);
+
+            // Список книг после удаления
+            library.ListBooks();
         }
     }
-
 }
